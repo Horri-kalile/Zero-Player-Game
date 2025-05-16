@@ -6,7 +6,7 @@ case class Attributes(strength: Int, constitution: Int, dexterity: Int, intellig
 
   def add(other: Attributes): Attributes = this + other
 
-  private def +(other: Attributes): Attributes = Attributes(
+  def +(other: Attributes): Attributes = Attributes(
     strength + other.strength,
     constitution + other.constitution,
     dexterity + other.dexterity,

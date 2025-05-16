@@ -3,7 +3,7 @@ package models.player
 import models.player.Player
 trait Behavior:
   def modify(player: Player): Unit
-/*
+
 object Aggressive extends Behavior:
   def modify(player: Player): Unit = ??? // e.g., bonus attack logic
 
@@ -26,9 +26,8 @@ object Lucky extends Behavior:
   def modify(player: Player): Unit = ??? // e.g., higher chance of rare events
 
 object InvulnerableOnce extends Behavior:
-  def modify(player: Player): Unit =
-    player.usedInvulnerability = false
+  def modify(player: Player): Unit = ???
 
 object OneShotChance extends Behavior:
   def modify(player: Player): Unit = ??? // e.g., rare instant kill
-*/
+
