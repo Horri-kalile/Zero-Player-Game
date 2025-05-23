@@ -3,11 +3,12 @@ package models.player
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.collection.immutable.HashMap
+import scala.util.Random
 
 class Player(val name: String,
              val identity: Identity,
              var level: Int,
-             private var exp: Int,
+             var exp: Int,
              var hp: Int,
              var mp: Int,
              var attributes: Attributes,
@@ -27,12 +28,13 @@ class Player(val name: String,
 
   def currentMP: Int = mp
 
+  //TODO calcolare exp necessaria in base al livello
   def gainExp(amount: Int): Unit =
     exp += amount
     if exp >= level * 100 then levelUp()
 
   /*TODO aggiornare stats*/
-  private def levelUp(): Unit =
+  def levelUp(): Unit =
     level += 1
     exp = 0
     hp = maxHP
@@ -47,11 +49,9 @@ class Player(val name: String,
   override def receiveHealing(amount: Int): Unit =
     hp = math.min(maxHP, hp + amount)
 
-  def useSkill(skill: Skill): Boolean =
-    if mp >= skill.manaCost then
-      mp -= skill.manaCost
-      true
-    else false
+  def useSkill(skill: Skill): Boolean = mp match
+    case a if mp >= skill.manaCost => mp -= skill.manaCost; true
+    case _ => false
 
   def equip(item: Equipment): Unit =
     equipment = equipment.updated(item.slot, Some(item))
@@ -72,3 +72,13 @@ class Player(val name: String,
       inventory -= item
     }
     true
+
+  def emptyInventory(): Boolean =
+    inventory.isEmpty
+
+  def stealFromInventory(): Option[Item] =
+    if inventory.nonEmpty then
+      val index = Random.nextInt(inventory.size)
+      Some(inventory.remove(index))
+    else None
+
