@@ -12,12 +12,13 @@ class Player(val name: String,
              var hp: Int,
              var mp: Int,
              var attributes: Attributes,
-             val behaviors: Behavior
+             val behaviorType: BehaviorType
             ) extends Entity:
 
   private val inventory: ListBuffer[Item] = ListBuffer.empty
   private var equipment: HashMap[EquipmentSlot, Option[Equipment]] = HashMap.from(EquipmentSlot.values.map(slot => slot -> None))
   val skills: List[Skill] = List.empty
+  private var behavior: Behavior = BehaviorResolver.getBehavior(behaviorType)
 
   /*TODO algoritmo di calcolo*/
   def maxHP: Int = attributes.constitution * 10
@@ -82,3 +83,19 @@ class Player(val name: String,
       Some(inventory.remove(index))
     else None
 
+  def startGame(): Unit =
+    // Apply any behavior effects that happen on game start
+    behavior.onGameStart(this)
+
+
+  def doDamage(damage: Int): Unit =
+    // Any behavior effects during a battle
+    behavior.onBattleDamage(this, damage)
+
+  def takeDamage(damage: Int): Unit =
+    // Behavior can modify the incoming damage
+    val finalDamage = behavior.onDamageTaken(this, damage)
+    hp = (hp - finalDamage).max(0)
+  // println (s"$name took $finalDamage damage, HP now $hp")
+
+  def isAlive: Boolean = hp > 0

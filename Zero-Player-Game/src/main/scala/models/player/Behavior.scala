@@ -2,42 +2,79 @@ package models.player
 
 import models.player.Player
 
+import scala.util.Random
+
 enum BehaviorType:
-  case Aggressive, Defensive, FastLeveling, DoubleAttack, DoubleHp, Lucky, InvulnerableOnce, OneShotChange
+  case Aggressive, Defensive, FastLeveling, TwiceAttack, Heal, Lucky, InvulnerableOnce, OneShotChange
 
 trait Behavior:
-  def modify(player: Player): Unit
+  def onGameStart(player: Player): Unit = ()
 
-// e.g., bonus attack logic
-class Aggressive extends Behavior:
-  def modify(player: Player): Unit =
-    val current = player.attributes
-    player.attributes = current.copy(strength = current.strength * 2)
+  def onBattleDamage(player: Player, damage: Int): Int = damage
 
-class Defensive extends Behavior:
-  def modify(player: Player): Unit = ??? // e.g., damage reduction logic
+  def onBattleEnd(player: Player, exp: Int): Int = exp
 
-class FastLeveling extends Behavior:
-  def modify(player: Player): Unit = ??? // e.g., exp boost
+  def onDamageTaken(player: Player, damage: Int): Int = damage
 
-class DoubleAttack extends Behavior:
-  def modify(player: Player): Unit = ??? // e.g., chance to attack twice
+// Aggressive enhance damage during battle
+object Aggressive extends Behavior:
+  override def onBattleDamage(player: Player, damage: Int): Int =
+    val newDamage = (damage * Random.between(1.1, 2.0)).toInt
+    newDamage
 
-class DoubleHP extends Behavior:
-  def modify(player: Player): Unit =
-    val current = player.attributes
-    player.attributes = current.copy(constitution = current.constitution * 2)
-    player.hp = player.maxHP
+// Defensive reduces damage taken during battle
+object Defensive extends Behavior:
+  override def onDamageTaken(player: Player, damage: Int): Int =
+    val reduced = (damage * 0.7).toInt // 30% damage reduction
+    reduced
 
-// e.g., higher chance of rare events
-class Lucky extends Behavior:
-  def modify(player: Player): Unit =
+// FastLeveling could grant extra XP at battle end
+object FastLeveling extends Behavior:
+  override def onBattleEnd(player: Player, exp: Int): Int = (exp * 1.3).toInt // 30% more exp
+
+// DoubleAttack could attack twice
+object TwiceAttack extends Behavior:
+  override def onBattleDamage(player: Player, damage: Int): Int =
+    val newDamage = (damage * Random.between(0.5, 1.5) + damage * Random.between(0.5, 1.5)).toInt
+    newDamage
+
+// DoubleHP doubles hp at start game
+object Heal extends Behavior:
+  override def onBattleEnd(player: Player, exp: Int): Int =
+    val heal = (player.maxHP * Random.between(0.1, 0.5)).toInt
+    player.hp = player.hp + heal
+    exp
+
+// Lucky doubles lucky attribute at game start
+object Lucky extends Behavior:
+  override def onGameStart(player: Player): Unit =
     val current = player.attributes
     player.attributes = current.copy(lucky = current.lucky * 2)
 
-class InvulnerableOnce extends Behavior:
-  def modify(player: Player): Unit = ???
+// InvulnerableOnce could miss once attack
+object InvulnerableOnce extends Behavior:
+  private var used = false
 
-class OneShotChance extends Behavior:
-  def modify(player: Player): Unit = ??? // e.g., rare instant kill
+  override def onDamageTaken(player: Player, damage: Int): Int =
+    if !used then
+      used = true
+      0 // No damage once
+    else
+      damage
 
+// OneShotChance could instant kill monster
+object OneShotChance extends Behavior:
+  override def onBattleDamage(player: Player, damage: Int): Int =
+    if Random.nextBoolean() then 9999999 else damage
+
+
+object BehaviorResolver:
+  def getBehavior(bt: BehaviorType): Behavior = bt match
+    case BehaviorType.Aggressive => Aggressive
+    case BehaviorType.Defensive => Defensive
+    case BehaviorType.FastLeveling => FastLeveling
+    case BehaviorType.TwiceAttack => TwiceAttack
+    case BehaviorType.Heal => Heal
+    case BehaviorType.Lucky => Lucky
+    case BehaviorType.InvulnerableOnce => InvulnerableOnce
+    case BehaviorType.OneShotChange => OneShotChance
