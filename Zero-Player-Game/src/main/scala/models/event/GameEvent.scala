@@ -36,65 +36,49 @@ class BuyEvent extends GameEvent:
 
 class SpecialEvent extends GameEvent:
   override def action(player: Player): Unit =
-    Random.nextInt(6) match
-      case 0 => player.gainExp(100); println("You helped someone. +100 XP")
-      case 1 => player.level = math.max(1, player.level - 1); println("You were cursed! Level down.")
-      case 2 => player.levelUp(); println("Blessed by gods! Level up.")
-      case 3 =>
-        val eq = ??? //TODO random equipment
-      //println(s"You found rare loot: ${eq.name}")
+    Random.nextInt(8) match
+      case 0 => // Level up/down by random levels
+        val change = Random.between(1, 4)
+        if Random.nextBoolean() then
+          for _ <- 1 to change do player.levelUp()
+          println(s"Blessing! You leveled up $change times.")
+        else
+          player.level = math.max(1, player.level - change)
+          println(s"Curse! You lost $change levels.")
+
+      case 1 => // Fight strong monster - good
+        val eq = ??? //TODO Equipment.random()
+        println("You defeated a powerful monster!")
+      /*println(s"You looted a rare item: ${eq.name}")
+      player.equip(eq)*/
+
+      case 2 => // Fight strong monster - bad
+        println("You were defeated by a powerful monster. Game over!")
+        player.receiveDamage(player.hp)
+
+      case 3 => // Discover dungeon - good
+        val eq = ??? //TODO Equipment.random()
+        println("You discovered a hidden dungeon and found rare equipment!")
       //player.equip(eq)
-      case 4 => player.receiveDamage(player.hp); println("Ambush! You died.")
-      case 5 =>
+
+      case 4 => // Discover dungeon - bad
+        player.hp = math.max(1, player.hp / 2)
+        player.mp = math.max(0, player.mp / 2)
+        println("You were injured in a dungeon trap! HP and MP halved.")
+
+      case 5 => // People ask for help - good TODO calculate exp
+        val gain = Random.between(50, 150)
+        player.gainExp(gain)
+        println(s"You helped villagers and gained $gain EXP.")
+
+      case 6 => // People ask for help - bad
+        println("It was a trap! You were killed. Game over!")
+        player.receiveDamage(player.hp) //TODO handle game over
+
+      case 7 => // Thief - steal inventory if any
         player.stealFromInventory() match
           case Some(item) => println(s"A thief stole your ${item.name}")
           case None => println("The thief found nothing to steal.")
-
-  class SpecialEvent extends GameEvent:
-    override def action(player: Player): Unit =
-      Random.nextInt(8) match
-        case 0 => // Level up/down by random levels
-          val change = Random.between(1, 4)
-          if Random.nextBoolean() then
-            for _ <- 1 to change do player.levelUp()
-            println(s"Blessing! You leveled up $change times.")
-          else
-            player.level = math.max(1, player.level - change)
-            println(s"Curse! You lost $change levels.")
-
-        case 1 => // Fight strong monster - good
-          val eq = ??? //TODO Equipment.random()
-          println("You defeated a powerful monster!")
-        /*println(s"You looted a rare item: ${eq.name}")
-        player.equip(eq)*/
-
-        case 2 => // Fight strong monster - bad
-          println("You were defeated by a powerful monster. Game over!")
-          player.receiveDamage(player.hp)
-
-        case 3 => // Discover dungeon - good
-          val eq = ??? //TODO Equipment.random()
-          println("You discovered a hidden dungeon and found rare equipment!")
-        //player.equip(eq)
-
-        case 4 => // Discover dungeon - bad
-          player.hp = math.max(1, player.hp / 2)
-          player.mp = math.max(0, player.mp / 2)
-          println("You were injured in a dungeon trap! HP and MP halved.")
-
-        case 5 => // People ask for help - good TODO calculate exp
-          val gain = Random.between(50, 150)
-          player.gainExp(gain)
-          println(s"You helped villagers and gained $gain EXP.")
-
-        case 6 => // People ask for help - bad
-          println("It was a trap! You were killed. Game over!")
-          player.receiveDamage(player.hp) //TODO handle game over
-
-        case 7 => // Thief - steal inventory if any
-          player.stealFromInventory() match
-            case Some(item) => println(s"A thief stole your ${item.name}")
-            case None => println("The thief found nothing to steal.")
 
 object EventFactory:
   def executeEvent(eventType: EventType, player: Player): Unit =
