@@ -20,5 +20,5 @@ object MonsterFactory:
     )
     val behavior = randomChoice(behaviors)
     val monsterType = randomChoice(monsterTypes)
-    Monster(name, attributes, origin, level, behavior, monsterType)
+    Monster(name, attributes, origin, monsterType,level,behavior)
 
