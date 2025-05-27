@@ -1,0 +1,12 @@
+.idea/
+.metals/
+.vscode/
+.bloop/
+
+project/
+target/
+
+
+Zero-Player-Game/.bsp/
+Zero-Player-Game/project/target/
+Zero-Player-Game/target/
