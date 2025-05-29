@@ -18,7 +18,7 @@ class Player(val name: String,
   private val inventory: ListBuffer[Item] = ListBuffer.empty
   private var equipment: HashMap[EquipmentSlot, Option[Equipment]] = HashMap.from(EquipmentSlot.values.map(slot => slot -> None))
   val skills: List[Skill] = List.empty
-  private var behavior: Behavior = BehaviorResolver.getBehavior(behaviorType)
+  private val behavior: Behavior = BehaviorResolver.getBehavior(behaviorType)
 
   /*TODO algoritmo di calcolo*/
   def maxHP: Int = attributes.constitution * 10
@@ -99,3 +99,7 @@ class Player(val name: String,
   // println (s"$name took $finalDamage damage, HP now $hp")
 
   def isAlive: Boolean = hp > 0
+
+  def replaceEquipment(current: Equipment, incoming: Equipment): Unit =
+    if incoming.value > current.value then equipment = equipment.updated(incoming.slot, Some(incoming))
+    recalculateAttributes()

@@ -9,6 +9,9 @@ case class Attributes(strength: Int, constitution: Int, dexterity: Int, intellig
 
   def add(other: Attributes): Attributes = this + other
 
+  def total: Int =
+    strength + constitution + dexterity + intelligence + wisdom + lucky
+
   def +(other: Attributes): Attributes = Attributes(
     strength + other.strength,
     constitution + other.constitution,
@@ -28,3 +31,27 @@ object Attributes:
       wisdom = Random.between(5, 16),
       lucky = Random.between(5, 16)
     )
+
+  //max is player level
+  private def biasedValue(weight: Double = 1.0, min: Int = 1, max: Int): Int =
+    val base = scala.util.Random.nextDouble() * weight * max
+    math.min(max, math.max(min, base.round.toInt))
+
+  private def generateWithWeights(weights: List[Double], playerLevel: Int): Attributes =
+    val List(str, con, dex, int, wis, luck)  = weights.map(w => biasedValue(w, max = playerLevel))
+    Attributes(str, con, dex, int, wis, luck)
+
+
+  def biasedFor(slot: EquipmentSlot, playerLevel: Int): Attributes =
+    val weights = slot match
+      case EquipmentSlot.Weapon => List(2.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+      case EquipmentSlot.Shield => List(1.0, 2.0, 0.8, 0.5, 1.0, 1.0)
+      case EquipmentSlot.Body => List(1.5, 1.8, 0.8, 0.6, 0.6, 0.8)
+      case EquipmentSlot.Gauntlets => List(1.6, 1.0, 1.4, 0.5, 0.5, 1.0)
+      case EquipmentSlot.Shoes => List(0.8, 0.8, 1.8, 0.8, 0.8, 1.5)
+      case EquipmentSlot.Head => List(0.6, 1.0, 0.8, 1.5, 1.5, 1.0)
+      case EquipmentSlot.Jewelry1 | EquipmentSlot.Jewelry2 =>
+        List(0.5, 0.5, 0.8, 1.5, 1.5, 1.5)
+
+    generateWithWeights(weights, playerLevel)
+

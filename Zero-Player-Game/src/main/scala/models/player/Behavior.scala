@@ -7,7 +7,7 @@ import scala.util.Random
 enum BehaviorType:
   case Aggressive, Defensive, FastLeveling, TwiceAttack, Heal, Lucky, InvulnerableOnce, OneShotChange
 
-trait Behavior:
+sealed trait Behavior:
   def onGameStart(player: Player): Unit = ()
 
   def onBattleDamage(player: Player, damage: Int): Int = damage

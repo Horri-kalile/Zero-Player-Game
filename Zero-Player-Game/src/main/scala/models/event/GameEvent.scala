@@ -7,34 +7,34 @@ import scala.util.Random
 enum EventType:
   case fight, mission, training, restore, sell, buy, special
 
-trait GameEvent:
+sealed trait GameEvent:
   def action(player: Player): Unit
 
-class FightEvent extends GameEvent:
+case object FightEvent extends GameEvent:
   override def action(player: Player): Unit = ???
 
-class MissionEvent extends GameEvent:
+case object MissionEvent extends GameEvent:
   override def action(player: Player): Unit = ???
 
-class TrainingEvent extends GameEvent:
+case object TrainingEvent extends GameEvent:
   override def action(player: Player): Unit =
     val exp = Random.between(player.exp * 0.25, player.exp * 0.5).toInt
     player.gainExp(exp)
     println(s"Training completed: +$exp EXP")
 
-class RestoreEvent extends GameEvent:
+case object RestoreEvent extends GameEvent:
   override def action(player: Player): Unit =
     player.hp = player.maxHP
     player.mp = player.maxMP
     println("You rested and recovered fully.")
 
-class SellEvent extends GameEvent:
+case object SellEvent extends GameEvent:
   override def action(player: Player): Unit = ???
 
-class BuyEvent extends GameEvent:
+case object BuyEvent extends GameEvent:
   override def action(player: Player): Unit = ???
 
-class SpecialEvent extends GameEvent:
+case object SpecialEvent extends GameEvent:
   override def action(player: Player): Unit =
     Random.nextInt(8) match
       case 0 => // Level up/down by random levels
@@ -83,11 +83,11 @@ class SpecialEvent extends GameEvent:
 object EventFactory:
   def executeEvent(eventType: EventType, player: Player): Unit =
     val event: GameEvent = eventType match
-      case EventType.fight => new FightEvent()
-      case EventType.mission => new MissionEvent()
-      case EventType.training => new TrainingEvent()
-      case EventType.restore => new RestoreEvent()
-      case EventType.sell => new SellEvent()
-      case EventType.buy => new BuyEvent()
-      case EventType.special => new SpecialEvent()
+      case EventType.fight => FightEvent
+      case EventType.mission => MissionEvent
+      case EventType.training => TrainingEvent
+      case EventType.restore => RestoreEvent
+      case EventType.sell => SellEvent
+      case EventType.buy => BuyEvent
+      case EventType.special => SpecialEvent
     event.action(player)
